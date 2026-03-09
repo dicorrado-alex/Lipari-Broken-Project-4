@@ -87,22 +87,22 @@ public class CustomerDao {
      */
     public List<Customer> findByFiscalCode(String fiscalCode) throws SQLException {
         Connection conn = DatabaseManager.getConnection();
+        try {
+            String sql = "SELECT id, fiscal_code, first_name, last_name, customer_type "
+                    + "FROM customers WHERE fiscal_code = ?";
 
-        String sql = "SELECT id, fiscal_code, first_name, last_name, customer_type "
-                + "FROM customers WHERE fiscal_code = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, fiscalCode);
+            ResultSet rs = pstmt.executeQuery();
 
-        PreparedStatement pstmt = conn.prepareStatement(sql);
-
-        pstmt.setString(1, fiscalCode);
-
-        ResultSet rs = pstmt.executeQuery();
-
-        List<Customer> result = new ArrayList<>();
-        while (rs.next()) {
-            result.add(mapRow(rs));
+            List<Customer> result = new ArrayList<>();
+            while (rs.next()) {
+                result.add(mapRow(rs));
+            }
+            return result;
+        } finally {
+            DatabaseManager.releaseConnection(conn);
         }
-
-        return result;
     }
 
     /**
@@ -113,15 +113,15 @@ public class CustomerDao {
         try {
             PreparedStatement pstmt = conn.prepareStatement(
                     "SELECT id, fiscal_code, first_name, last_name, customer_type "
-                    + "FROM customers WHERE id = ?");
+                            + "FROM customers WHERE id = ?");
             pstmt.setLong(1, id);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
                 return Optional.of(mapRow(rs));
             }
             return Optional.empty();
-        } catch (SQLException e) {
-            throw e;
+        } finally {
+            DatabaseManager.releaseConnection(conn);
         }
     }
 

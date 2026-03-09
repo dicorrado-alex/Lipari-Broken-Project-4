@@ -73,15 +73,15 @@ public class AccountDao {
         try {
             PreparedStatement pstmt = conn.prepareStatement(
                     "SELECT id, iban, balance, account_type, customer_id "
-                    + "FROM accounts WHERE id = ?");
+                            + "FROM accounts WHERE id = ?");
             pstmt.setLong(1, id);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
                 return Optional.of(mapRow(rs));
             }
             return Optional.empty();
-        } catch (SQLException e) {
-            throw e;
+        } finally {
+            DatabaseManager.releaseConnection(conn);
         }
     }
 
